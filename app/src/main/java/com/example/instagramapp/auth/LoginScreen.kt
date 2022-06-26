@@ -1,5 +1,6 @@
 package com.example.instagramapp.auth
 
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,11 +30,11 @@ import com.example.instagramapp.main.CommonProgressSpinner
 import com.example.instagramapp.main.navigateTo
 
 @Composable
-fun SignupScreen(navController: NavController, vm: IgViewModel) {
+fun LoginScreen(navController: NavController, vm: IgViewModel) {
 
     val focus = LocalFocusManager.current
 
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -44,7 +45,6 @@ fun SignupScreen(navController: NavController, vm: IgViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
 
         ) {
-            val usernameState = remember { mutableStateOf(TextFieldValue()) }
             val emailState = remember { mutableStateOf(TextFieldValue()) }
             val passState = remember { mutableStateOf(TextFieldValue()) }
 
@@ -58,64 +58,44 @@ fun SignupScreen(navController: NavController, vm: IgViewModel) {
             )
 
             Text(
-                text = "Signup",
+                text = "Login",
                 modifier = Modifier.padding(8.dp),
                 fontSize = 30.sp,
-                fontFamily = FontFamily.SansSerif
+                fontFamily = FontFamily.Serif
             )
-
-            OutlinedTextField(
-                value = usernameState.value,
-                onValueChange = { usernameState.value = it },
-                modifier = Modifier.padding(8.dp),
-                label = {
-                    Text(
-                        text = "Username"
-                    )
-                })
 
             OutlinedTextField(
                 value = emailState.value,
                 onValueChange = { emailState.value = it },
                 modifier = Modifier.padding(8.dp),
-                label = {
-                    Text(
-                        text = "Email"
-                    )
-                })
+                label = { Text(text = "Email") }
+            )
 
             OutlinedTextField(
                 value = passState.value,
                 onValueChange = { passState.value = it },
                 modifier = Modifier.padding(8.dp),
-                label = {
-                    Text(
-                        text = "Password"
-                    )
-                },
+                label = { Text(text = "Password") },
                 visualTransformation = PasswordVisualTransformation()
             )
 
             Button(onClick = {
                 focus.clearFocus(force = true)
-                vm.onSignup(
-                    usernameState.value.text,
-                    emailState.value.text,
-                    passState.value.text
-                )
+                vm.onLogin(emailState.value.text, passState.value.text)
             }, modifier = Modifier.padding(8.dp)) {
-                Text(text = "SIGN UP")
+                Text(text = "LOGIN")
             }
 
-            Text(
-                text = "Already a user? Go to Login ->",
+            Text(text = "New here? Go to Signup ->",
                 color = Color.Blue,
                 modifier = Modifier
                     .padding(8.dp)
                     .clickable {
-                        navigateTo(navController, DestinationScreen.Login)
-                    })
+                        navigateTo(navController, DestinationScreen.Signup)
+                    }
+            )
         }
+
         val isLoading = vm.inProgress.value
         if (isLoading) {
             CommonProgressSpinner()
