@@ -16,7 +16,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.instagramapp.auth.LoginScreen
 import com.example.instagramapp.auth.SignupScreen
 import com.example.instagramapp.main.FeedScreen
+import com.example.instagramapp.main.MyPostsScreen
 import com.example.instagramapp.main.NotificationMessage
+import com.example.instagramapp.main.SearchScreen
 import com.example.instagramapp.ui.theme.InstagramAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -42,24 +44,32 @@ sealed class DestinationScreen(val route: String) {
     object Signup : DestinationScreen("signup")
     object Login : DestinationScreen("login")
     object FeedScreen : DestinationScreen("feed")
+    object SearchScreen : DestinationScreen("search")
+    object MyPostsScreen : DestinationScreen("myposts")
 }
 
 @Composable
 fun InstagramApp() {
     val vm = hiltViewModel<IgViewModel>()
     val navController = rememberNavController()
-    
+
     NotificationMessage(vm = vm)
 
     NavHost(navController = navController, startDestination = DestinationScreen.Signup.route) {
         composable(DestinationScreen.Signup.route) {
             SignupScreen(navController = navController, vm = vm)
         }
-        composable(DestinationScreen.Login.route){
+        composable(DestinationScreen.Login.route) {
             LoginScreen(navController = navController, vm = vm)
         }
-        composable(DestinationScreen.FeedScreen.route){
+        composable(DestinationScreen.FeedScreen.route) {
             FeedScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.SearchScreen.route) {
+            SearchScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.MyPostsScreen.route) {
+            MyPostsScreen(navController = navController, vm = vm)
         }
     }
 

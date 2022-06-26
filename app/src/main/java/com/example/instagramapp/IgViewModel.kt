@@ -76,7 +76,7 @@ class IgViewModel @Inject constructor(
                     signedIn.value = true
                     inProgress.value = false
                     auth.currentUser?.uid?.let{ uid ->
-                        handleException(customMessage = "Login success")
+//                        handleException(customMessage = "Login success")
                         getUserData(uid)
                     }
                 }else{
