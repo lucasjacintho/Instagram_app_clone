@@ -53,7 +53,7 @@ fun NewPostScreen(navController: NavController, vm: IgViewModel, encodedUri: Str
             Text(text = "Cancel", modifier = Modifier.clickable { navController.popBackStack() })
             Text(text = "Post", modifier = Modifier.clickable {
                 focusManager.clearFocus()
-//                Call the vm to post image
+                vm.onNewPost(Uri.parse(imageUri), description){ navController.popBackStack()}
             })
         }
 
