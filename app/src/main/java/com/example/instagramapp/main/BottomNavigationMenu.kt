@@ -17,6 +17,7 @@ import com.example.instagramapp.R
 enum class BottomNavigationItem(val icon: Int, val destination: DestinationScreen) {
     FEED(R.drawable.ic_home, DestinationScreen.FeedScreen),
     SEARCH(R.drawable.ic_search, DestinationScreen.SearchScreen),
+    ADDPOST(R.drawable.ic_add_post,DestinationScreen.NewPostScreen),
     POSTS(R.drawable.ic_posts, DestinationScreen.MyPostsScreen)
 }
 

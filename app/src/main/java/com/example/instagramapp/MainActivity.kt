@@ -14,11 +14,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.instagramapp.auth.LoginScreen
+import com.example.instagramapp.auth.ProfileScreen
 import com.example.instagramapp.auth.SignupScreen
-import com.example.instagramapp.main.FeedScreen
-import com.example.instagramapp.main.MyPostsScreen
-import com.example.instagramapp.main.NotificationMessage
-import com.example.instagramapp.main.SearchScreen
+import com.example.instagramapp.main.*
 import com.example.instagramapp.ui.theme.InstagramAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,6 +44,10 @@ sealed class DestinationScreen(val route: String) {
     object FeedScreen : DestinationScreen("feed")
     object SearchScreen : DestinationScreen("search")
     object MyPostsScreen : DestinationScreen("myposts")
+    object ProfileScreen : DestinationScreen("profile")
+    object NewPostScreen : DestinationScreen("newpost/{imageUri}"){
+        fun createRoute(uri : String) = "newpost/$uri"
+    }
 }
 
 @Composable
@@ -70,6 +72,15 @@ fun InstagramApp() {
         }
         composable(DestinationScreen.MyPostsScreen.route) {
             MyPostsScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.ProfileScreen.route) {
+            ProfileScreen(navController = navController, vm = vm)
+        }
+        composable(DestinationScreen.NewPostScreen.route) { navBackStachEntry ->
+            val imageUri = navBackStachEntry.arguments?.getString("imageUri")
+            imageUri?.let { 
+                NewPostScreen(navController = navController, vm = vm, encodedUri = it)
+            }
         }
     }
 

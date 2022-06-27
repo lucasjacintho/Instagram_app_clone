@@ -1,5 +1,6 @@
 package com.example.instagramapp
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.instagramapp.data.Event
@@ -9,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.*
 import javax.inject.Inject
 
 const val USERS = "users"
@@ -36,7 +38,7 @@ class IgViewModel @Inject constructor(
 
     fun onSignup(username: String, email: String, password: String) {
 
-        if(username.isEmpty() or email.isEmpty() or password.isEmpty()){
+        if (username.isEmpty() or email.isEmpty() or password.isEmpty()) {
             handleException(customMessage = "Please fill in all fields")
             return
         }
@@ -63,28 +65,28 @@ class IgViewModel @Inject constructor(
             .addOnFailureListener { }
     }
 
-    fun onLogin(email: String, password : String){
-        if(email.isEmpty() or password.isEmpty()){
+    fun onLogin(email: String, password: String) {
+        if (email.isEmpty() or password.isEmpty()) {
             handleException(customMessage = "Please fill in all fields")
             return
         }
 
         inProgress.value = true
         auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener{ task ->
-                if (task.isSuccessful){
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     signedIn.value = true
                     inProgress.value = false
-                    auth.currentUser?.uid?.let{ uid ->
+                    auth.currentUser?.uid?.let { uid ->
 //                        handleException(customMessage = "Login success")
                         getUserData(uid)
                     }
-                }else{
+                } else {
                     handleException(task.exception, "Login failed")
                 }
             }
             .addOnFailureListener { e ->
-                handleException(e, "Login failed")
+                handleException(customMessage = "Login failed: User or password is incorrectly")
                 inProgress.value = false
             }
     }
@@ -148,7 +150,7 @@ class IgViewModel @Inject constructor(
             }
     }
 
-    fun handleException(exception: Exception? = null, customMessage: String = "") {
+    private fun handleException(exception: Exception? = null, customMessage: String = "") {
         exception?.printStackTrace()
 
         val errorMsg = exception?.localizedMessage ?: ""
@@ -156,4 +158,38 @@ class IgViewModel @Inject constructor(
         popupNotification.value = Event(message)
     }
 
+    fun updateProfileData(name: String, username: String, bio: String) {
+        createOrUpdateProfile(name, username, bio)
+    }
+
+    private fun uploadImage(uri: Uri, onSuccess: (Uri) -> Unit) {
+        inProgress.value = true
+
+        val storageReference = storage.reference
+        val uuid = UUID.randomUUID()
+        val imageReference = storageReference.child("images/$uuid")
+        val uploadTask = imageReference.putFile(uri)
+
+        uploadTask.addOnSuccessListener {
+            val result = it.metadata?.reference?.downloadUrl
+            result?.addOnSuccessListener(onSuccess)
+        }.addOnFailureListener { e ->
+            handleException(e)
+            inProgress.value = false
+        }
+    }
+
+    fun uploadProfileImage(uri: Uri) {
+        uploadImage(uri) {
+            createOrUpdateProfile(imageUrl = it.toString())
+        }
+    }
+
+    fun onLogout(){
+        auth.signOut()
+        signedIn.value = false
+        userData.value = null
+        popupNotification.value = Event("Logged out")
+
+    }
 }
