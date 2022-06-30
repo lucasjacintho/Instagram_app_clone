@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.instagramapp.IgViewModel
 
+
 @Composable
 fun NewPostScreen(navController: NavController, vm: IgViewModel, encodedUri: String) {
 
@@ -53,7 +54,7 @@ fun NewPostScreen(navController: NavController, vm: IgViewModel, encodedUri: Str
             Text(text = "Cancel", modifier = Modifier.clickable { navController.popBackStack() })
             Text(text = "Post", modifier = Modifier.clickable {
                 focusManager.clearFocus()
-                vm.onNewPost(Uri.parse(imageUri), description){ navController.popBackStack()}
+                vm.onNewPost(Uri.parse(imageUri), description) { navController.popBackStack() }
             })
         }
 
