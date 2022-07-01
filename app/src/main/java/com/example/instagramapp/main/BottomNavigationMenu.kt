@@ -36,7 +36,7 @@ fun BottomNavigationMenu(selectedItem: BottomNavigationItem, navController: NavC
                 painter = painterResource(id = item.icon),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .padding(5.dp)
                     .weight(1f)
                     .clickable {

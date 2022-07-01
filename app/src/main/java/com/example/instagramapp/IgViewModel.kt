@@ -35,6 +35,9 @@ class IgViewModel @Inject constructor(
     val refreshPostProgress = mutableStateOf(false)
     val posts = mutableStateOf<List<PostData>>(listOf())
 
+    val searchedPosts = mutableStateOf<List<PostData>>(listOf())
+    val searchedPostsProgress = mutableStateOf(false)
+
     init {
 //        auth.signOut()
         val currentUser = auth.currentUser
@@ -240,6 +243,13 @@ class IgViewModel @Inject constructor(
 
         if (currentUid != null) {
             val postUUID = UUID.randomUUID().toString()
+
+            val fillerWords =
+                listOf("the", "be", "to", "is", "of", "and", "or", "a", "in", "it", "on")
+
+            val searchTerms = description.split(" ", ".", ",", "?", "!", "#").map { it.lowercase() }
+                .filter { it.isNotEmpty() and !fillerWords.contains(it) }
+
             val post = PostData(
                 postId = postUUID,
                 userId = currentUid,
@@ -248,7 +258,8 @@ class IgViewModel @Inject constructor(
                 postImage = imageUri.toString(),
                 postDescription = description,
                 time = System.currentTimeMillis(),
-                likes = listOf<String>()
+                likes = listOf<String>(),
+                searchTerms = searchTerms
             )
 
             db.collection(POSTS).document(postUUID).set(post)
@@ -302,5 +313,19 @@ class IgViewModel @Inject constructor(
         outState.value = sortedPosts
     }
 
-
+    fun searchPosts(searchTerms: String) {
+        if (searchTerms.isNotEmpty()) {
+            searchedPostsProgress.value = true
+            db.collection(POSTS).whereArrayContains("searchTerms", searchTerms.trim().lowercase())
+                .get()
+                .addOnSuccessListener {
+                    convertPosts(it, searchedPosts)
+                    searchedPostsProgress.value = false
+                }
+                .addOnFailureListener { e ->
+                    handleException(e, "Cannot search posts")
+                    searchedPostsProgress.value = false
+                }
+        }
+    }
 }
