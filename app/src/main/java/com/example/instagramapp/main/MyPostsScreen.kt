@@ -195,14 +195,14 @@ fun PostList(
         CommonProgressSpinner()
     } else if (posts.isEmpty()) {
         Column(
-            modifier = Modifier,
+            modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             if (!isContextLoading) Text(text = "No posts available")
         }
     } else {
-        LazyColumn(modifier = Modifier) {
+        LazyColumn(modifier = modifier) {
             val rows = arrayListOf<PostRow>()
             var currentRow = PostRow()
             rows.add(currentRow)
