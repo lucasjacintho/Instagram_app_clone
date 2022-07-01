@@ -63,16 +63,23 @@ fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostD
             Text(text = post.username ?: "")
             Text(text = ".", modifier = Modifier.padding(8.dp))
 
-            if (!userData?.userId.equals(post.userId)) {
+            if (userData?.userId == post.userId) {
+//                not display follow, because it's current logged account
+            } else if (userData?.following?.contains(post.userId) == true) {
+                Text(text = "Following", color = Color.Gray, modifier = Modifier.clickable {
+                    vm.onFollowClick(userId = post.userId!!)
+                })
+            } else {
                 Text(text = "Follow", color = Color.Blue, modifier = Modifier.clickable {
-//                    Follow a user
+                    vm.onFollowClick(userId = post.userId!!)
                 })
             }
         }
     }
 
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .background(Color.LightGray)
             .defaultMinSize(minHeight = 250.dp),
         Alignment.Center

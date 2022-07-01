@@ -3,6 +3,7 @@ package com.example.instagramapp.data
 data class UserData(
     var userId : String? = null,
     var name : String? = null,
+    var email : String? = null,
     var username : String? = null,
     var imageUrl : String? = null,
     var bio : String? = null,
