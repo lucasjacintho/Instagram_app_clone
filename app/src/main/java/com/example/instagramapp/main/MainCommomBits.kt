@@ -90,7 +90,7 @@ fun CommonImage(
     Image(
         painter = painter,
         contentDescription = null,
-        modifier = Modifier,
+        modifier = modifier,
         contentScale = contentScale
     )
 

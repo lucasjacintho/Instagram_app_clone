@@ -1,6 +1,7 @@
 package com.example.instagramapp
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -22,9 +23,9 @@ const val POSTS = "posts"
 
 @HiltViewModel
 class IgViewModel @Inject constructor(
-    val auth: FirebaseAuth,
-    val db: FirebaseFirestore,
-    val storage: FirebaseStorage
+    private val auth: FirebaseAuth,
+    private val db: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) : ViewModel() {
 
     val signedIn = mutableStateOf(false)
@@ -37,6 +38,9 @@ class IgViewModel @Inject constructor(
 
     val searchedPosts = mutableStateOf<List<PostData>>(listOf())
     val searchedPostsProgress = mutableStateOf(false)
+
+    val postsFeed = mutableStateOf<List<PostData>>(listOf())
+    val postsFeedProgress = mutableStateOf(false)
 
     init {
 //        auth.signOut()
@@ -97,7 +101,7 @@ class IgViewModel @Inject constructor(
                     handleException(task.exception, "Login failed")
                 }
             }
-            .addOnFailureListener { e ->
+            .addOnFailureListener {
                 handleException(customMessage = "Login failed: User or password is incorrectly")
                 inProgress.value = false
             }
@@ -155,7 +159,7 @@ class IgViewModel @Inject constructor(
                 userData.value = user
                 inProgress.value = false
                 refreshPosts()
-//                popupNotification.value = Event("User Data retrieved successfully")
+                getPersonalizedFeed()
             }
             .addOnFailureListener { e ->
                 handleException(e, "Cannot retrieve user data")
@@ -229,6 +233,7 @@ class IgViewModel @Inject constructor(
         userData.value = null
         popupNotification.value = Event("Logged out")
         searchedPosts.value = listOf()
+        postsFeed.value = listOf()
     }
 
     fun onNewPost(uri: Uri, description: String, onPostSuccess: () -> Unit) {
@@ -260,7 +265,7 @@ class IgViewModel @Inject constructor(
                 postImage = imageUri.toString(),
                 postDescription = description,
                 time = System.currentTimeMillis(),
-                likes = listOf<String>(),
+                likes = listOf(),
                 searchTerms = searchTerms
             )
 
@@ -334,12 +339,12 @@ class IgViewModel @Inject constructor(
     fun onFollowClick(userId: String) {
         auth.currentUser?.uid?.let { currentUser ->
             val following = arrayListOf<String>()
-            userData.value?.following?.let{
+            userData.value?.following?.let {
                 following.addAll(it)
             }
-            if(following.contains(userId)){
+            if (following.contains(userId)) {
                 following.remove(userId)
-            }else{
+            } else {
                 following.add(userId)
             }
 
@@ -349,4 +354,43 @@ class IgViewModel @Inject constructor(
                 }
         }
     }
+
+    private fun getPersonalizedFeed() {
+        val following = userData.value?.following
+        if (!following.isNullOrEmpty()) {
+            postsFeedProgress.value = true
+
+            db.collection(POSTS).whereIn("userId", following).get()
+                .addOnSuccessListener {
+                    convertPosts(documents = it, outState = postsFeed)
+                    if (postsFeed.value.isEmpty()) {
+                        getGeneralFeed()
+                    } else {
+                        postsFeedProgress.value = false
+                    }
+                }
+                .addOnFailureListener { e ->
+                    handleException(e, "Cannot get personalized feed")
+                    postsFeedProgress.value = false
+                }
+        } else {
+            getGeneralFeed()
+        }
+    }
+
+    private fun getGeneralFeed() {
+        postsFeedProgress.value = true
+        val currentTime = System.currentTimeMillis()
+        val difference = 24 * 60 * 60 * 1000
+        db.collection(POSTS).whereGreaterThan("time", currentTime - difference).get()
+            .addOnSuccessListener {
+                convertPosts(documents = it, outState = postsFeed)
+                postsFeedProgress.value = false
+            }
+            .addOnFailureListener { e ->
+                handleException(e, "Cannot get feed")
+                postsFeedProgress.value = false
+            }
+    }
+
 }
