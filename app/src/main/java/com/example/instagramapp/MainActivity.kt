@@ -46,11 +46,15 @@ sealed class DestinationScreen(val route: String) {
     object SearchScreen : DestinationScreen("search")
     object MyPostsScreen : DestinationScreen("myposts")
     object ProfileScreen : DestinationScreen("profile")
+    object SinglesPost : DestinationScreen("singlepost")
+
     object NewPostScreen : DestinationScreen("newpost/{imageUri}") {
         fun createRoute(uri: String) = "newpost/$uri"
     }
 
-    object SinglesPost : DestinationScreen("singlepost")
+    object CommentsScreen : DestinationScreen("comments/{postId}") {
+        fun createRoute(postId: String) = "comments/$postId"
+    }
 }
 
 @Composable
@@ -79,12 +83,6 @@ fun InstagramApp() {
         composable(DestinationScreen.ProfileScreen.route) {
             ProfileScreen(navController = navController, vm = vm)
         }
-        composable(DestinationScreen.NewPostScreen.route) { navBackStachEntry ->
-            val imageUri = navBackStachEntry.arguments?.getString("imageUri")
-            imageUri?.let {
-                NewPostScreen(navController = navController, vm = vm, encodedUri = it)
-            }
-        }
         composable(DestinationScreen.SinglesPost.route) {
             val postData =
                 navController.previousBackStackEntry?.arguments?.getParcelable<PostData>("post")
@@ -94,6 +92,20 @@ fun InstagramApp() {
                     vm = vm,
                     post = postData
                 )
+            }
+        }
+
+        composable(DestinationScreen.NewPostScreen.route) { navBackStachEntry ->
+            val imageUri = navBackStachEntry.arguments?.getString("imageUri")
+            imageUri?.let {
+                NewPostScreen(navController = navController, vm = vm, encodedUri = it)
+            }
+        }
+
+        composable(DestinationScreen.CommentsScreen.route) { navBackStackEntry ->
+            val postId = navBackStackEntry.arguments?.getString("postId")
+            postId?.let {
+                CommentsScreen(navController = navController, vm = vm, postId = it)
             }
         }
     }

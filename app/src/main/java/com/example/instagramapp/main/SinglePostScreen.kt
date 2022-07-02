@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,12 +19,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.instagramapp.DestinationScreen
 import com.example.instagramapp.IgViewModel
 import com.example.instagramapp.R
 import com.example.instagramapp.data.PostData
 
 @Composable
 fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostData) {
+
+    val comments = vm.comments.value
+
+    LaunchedEffect(key1 = Unit){
+        vm.getComments(post.postId)
+    }
+
     post.userId.let {
         Column(
             modifier = Modifier
@@ -35,13 +44,13 @@ fun SinglePostScreen(navController: NavController, vm: IgViewModel, post: PostDa
 
             CommonDivider()
 
-            SinglePostDisplay(navController = navController, vm = vm, post = post)
+            SinglePostDisplay(navController = navController, vm = vm, post = post, nbComments = comments.size)
         }
     }
 }
 
 @Composable
-fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostData) {
+fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostData, nbComments : Int) {
     val userData = vm.userData.value
     Box(
         modifier = Modifier
@@ -115,6 +124,15 @@ fun SinglePostDisplay(navController: NavController, vm: IgViewModel, post: PostD
     }
 
     Row(modifier = Modifier.padding(8.dp)) {
-        Text(text = "10 comments", color = Color.Gray, modifier = Modifier.padding(start = 8.dp))
+        Text(
+            text = "$nbComments comments",
+            color = Color.Gray,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .clickable {
+                    post.postId?.let {
+                        navController.navigate(DestinationScreen.CommentsScreen.createRoute(it))
+                    }
+                })
     }
 }

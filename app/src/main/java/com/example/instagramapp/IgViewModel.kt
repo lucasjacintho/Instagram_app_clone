@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.instagramapp.data.CommentData
 import com.example.instagramapp.data.Event
 import com.example.instagramapp.data.PostData
 import com.example.instagramapp.data.UserData
@@ -19,6 +20,7 @@ import javax.inject.Inject
 
 const val USERS = "users"
 const val POSTS = "posts"
+const val COMMENTS = "comments"
 
 @HiltViewModel
 class IgViewModel @Inject constructor(
@@ -40,6 +42,9 @@ class IgViewModel @Inject constructor(
 
     val postsFeed = mutableStateOf<List<PostData>>(listOf())
     val postsFeedProgress = mutableStateOf(false)
+
+    val comments = mutableStateOf<List<CommentData>>(listOf())
+    val commentsProgress = mutableStateOf(false)
 
     init {
 //        auth.signOut()
@@ -233,6 +238,7 @@ class IgViewModel @Inject constructor(
         popupNotification.value = Event("Logged out")
         searchedPosts.value = listOf()
         postsFeed.value = listOf()
+        comments.value = listOf()
     }
 
     fun onNewPost(uri: Uri, description: String, onPostSuccess: () -> Unit) {
@@ -414,5 +420,44 @@ class IgViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun createComment(postId: String, text: String) {
+        userData.value?.username?.let { username ->
+            val commentId = UUID.randomUUID().toString()
+            val comment = CommentData(
+                commentId = commentId,
+                postId = postId,
+                username = username,
+                text = text,
+                timestamp = System.currentTimeMillis()
+            )
+
+            db.collection(COMMENTS).document(commentId).set(comment)
+                .addOnSuccessListener {
+                    getComments(postId)
+                }
+                .addOnFailureListener { e -> handleException(e, "Cannot create comment") }
+        }
+    }
+
+    fun getComments(postId: String?) {
+        commentsProgress.value = true
+        db.collection(COMMENTS).whereEqualTo("postId", postId).get()
+            .addOnSuccessListener { documents ->
+                val newComments = mutableListOf<CommentData>()
+                documents.forEach { doc ->
+                    val comment = doc.toObject<CommentData>()
+                    newComments.add(comment)
+                }
+
+                val sortedComments = newComments.sortedByDescending {it.timestamp}
+                comments.value = sortedComments
+                commentsProgress.value = false
+            }
+            .addOnFailureListener { e ->
+                handleException(e,"Cannot retrieve comments")
+                commentsProgress.value = false
+            }
     }
 }
