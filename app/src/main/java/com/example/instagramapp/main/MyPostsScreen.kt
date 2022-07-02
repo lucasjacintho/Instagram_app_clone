@@ -67,6 +67,8 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
     val postsLoading = vm.refreshPostProgress.value
     val posts = vm.posts.value
 
+    val followers = vm.followers.value
+
     Column {
         Column(modifier = Modifier.weight(1f)) {
             Row {
@@ -75,7 +77,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
                 }
 
                 Text(
-                    text = "15\nposts",
+                    text = "${posts.size}\nposts",
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
@@ -83,7 +85,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
                 )
 
                 Text(
-                    text = "54\nfollowers",
+                    text = "${followers}\nfollowers",
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
@@ -91,7 +93,7 @@ fun MyPostsScreen(navController: NavController, vm: IgViewModel) {
                 )
 
                 Text(
-                    text = "93\nfollowing",
+                    text = "${userData?.following?.size ?: 0}\nfollowing",
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),

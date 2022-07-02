@@ -2,6 +2,7 @@ package com.example.instagramapp.main
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,6 +37,8 @@ fun FeedScreen(navController: NavController, vm: IgViewModel) {
     val userData = vm.userData.value
     val personalizedFeed = vm.postsFeed.value
     val personalizedFeedLoading = vm.postsFeedProgress.value
+
+
 
     Column(
         modifier = Modifier
@@ -96,6 +99,8 @@ fun PostsList(
 fun Post(post: PostData, currentUserId: String, vm: IgViewModel, onPostClick: () -> Unit) {
     val likeAnimation = remember { mutableStateOf(false) }
     val dislikeAnimation = remember { mutableStateOf(false) }
+    val userData = vm.userData.value
+
 
     Card(
         shape = RoundedCornerShape(corner = CornerSize(4.dp)),
@@ -120,6 +125,16 @@ fun Post(post: PostData, currentUserId: String, vm: IgViewModel, onPostClick: ()
                 }
 
                 Text(text = post.username ?: "", modifier = Modifier.padding(4.dp))
+                if (userData?.userId == post.userId) {
+                } else if (userData?.following?.contains(post.userId) == true) {
+                    Text(text = " . Following", color = Color.Gray, modifier = Modifier.clickable {
+                        vm.onFollowClick(userId = post.userId!!)
+                    })
+                } else {
+                    Text(text = " . Follow", color = Color.Blue, modifier = Modifier.clickable {
+                        vm.onFollowClick(userId = post.userId!!)
+                    })
+                }
             }
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
