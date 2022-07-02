@@ -1,7 +1,6 @@
 package com.example.instagramapp
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -393,4 +392,27 @@ class IgViewModel @Inject constructor(
             }
     }
 
+    fun onLikePost(postData: PostData) {
+        auth.currentUser?.uid?.let { userId ->
+            postData.likes?.let { likes ->
+                val newLikes = arrayListOf<String>()
+                if (likes.contains(userId)) {
+                    newLikes.addAll(likes.filter { userId != it })
+                } else {
+                    newLikes.addAll(likes)
+                    newLikes.add(userId)
+                }
+
+                postData.postId?.let { postId ->
+                    db.collection(POSTS).document(postId).update("likes", newLikes)
+                        .addOnSuccessListener {
+                            postData.likes = newLikes
+                        }
+                        .addOnFailureListener {
+                            handleException(it, "Unable to like post")
+                        }
+                }
+            }
+        }
+    }
 }
